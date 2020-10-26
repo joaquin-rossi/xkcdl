@@ -1,0 +1,70 @@
+#!/bin/sh
+l_flag=''
+d_flag=''
+file=''
+a_flag=''
+
+url_xkcd='https://xkcd.com/'
+
+print_usage() {
+	echo "usage: scraper [-h] [-l] [-d XKCD_NUM] [-a]\n"
+	echo "arguments:"
+	echo "-h            show this help message and exit"
+	echo "-d XKCD_NUM   download specified comic by number"
+	echo "-l            download latest comic"
+	echo "-a            download all comics"
+}
+
+download() {
+	wget --quiet -O "$1".html "$url_xkcd""$1"
+	url_image=$(grep "Image URL (for hotlinking/embedding):" "$1".html | sed 's/Image URL (for hotlinking\/embedding)\: //g')
+
+	wget --quiet -O "$1" "$url_image"
+	echo Downloading xkcd \#"$1" from "$url_image"
+
+	convert "$1" "$1".png
+	rm "$1".html "$1"
+
+	echo xkcd \#"$1" downloaded
+}
+
+
+while getopts 'hld:a' flag; do
+	case "${flag}" in
+		h) print_usage; exit 1 ;;
+		l) l_flag='true' ;;
+		d) d_flag='true'; file="${OPTARG}" ;;
+		a) a_flag='true' ;;
+	esac
+done
+
+if [ -z "$l_flag" ] && [ -z "$a_flag" ] && [ -z "$d_flag" ]
+then
+	print_usage; exit 1
+fi
+
+if [ -n "$d_flag" ]
+then
+	download "$file"
+fi
+
+if [ -n "$l_flag" ] || [ -n "$a_flag" ]
+then
+	wget --quiet -O latest.html "$url_xkcd"
+	latest=$(grep "prev" latest.html | head -n 1 | awk '{print $3}' | sed 's/href="\///g' | sed 's/\/"//g')
+	latest=$(($latest+1))
+	rm latest.html
+fi
+
+if [ -n "$l_flag" ]
+then
+	download "$latest"
+fi
+
+if [ -n "$a_flag" ]
+then
+	for i in $(seq 1 "$latest")
+	do
+		download "$i"
+	done
+fi
