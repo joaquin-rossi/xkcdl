@@ -7,7 +7,7 @@ a_flag=''
 url_xkcd='https://xkcd.com/'
 
 print_usage() {
-	echo "usage: scraper [-h] [-l] [-d XKCD_NUM] [-a]\n"
+	echo "usage: xkcdl [-h] [-l] [-d XKCD_NUM] [-a]\n"
 	echo "arguments:"
 	echo "-h            show this help message and exit"
 	echo "-d XKCD_NUM   download specified comic by number"
