@@ -19,15 +19,11 @@ download() {
 	wget --quiet -O "$1".html "$url_xkcd""$1"
 	url_image=$(grep "Image URL (for hotlinking/embedding):" "$1".html | sed 's/Image URL (for hotlinking\/embedding)\: //g')
 
-	wget --quiet -O "$1" "$url_image"
-	echo Downloading xkcd \#"$1" from "$url_image"
+	wget --quiet -O "$1"."${url_image##*.}" "$url_image"
+	echo xkcd \#"$1" from "$url_image" downloaded
 
-	convert "$1" "$1".png
-	rm "$1".html "$1"
-
-	echo xkcd \#"$1" downloaded
+	rm "$1".html
 }
-
 
 while getopts 'hld:a' flag; do
 	case "${flag}" in
