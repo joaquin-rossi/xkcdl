@@ -31,9 +31,10 @@ do
 	case "$flag"
 	in
 		h) usage ; exit ;;
-		n) download ${OPTARG} ; exit ;;
-		l) download $(latest) ; exit ;;
-		a) for i in $(seq $(latest)); do download $i; done ; exit ;;
+		n) download "${OPTARG}" ; exit ;;
+		l) download "$(latest)" ; exit ;;
+		a) for i in $(seq "$(latest)"); do download "$i"; done ; exit ;;
+		*) exit ;;
 	esac
 done
 
