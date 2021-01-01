@@ -15,14 +15,14 @@ EOF
 
 download()
 {
-	image=$(curl -s "$url/$1/" | grep "URL" | awk '{print $5}')
-	curl -so "$1"."${image##*.}" "$image"
+	image=$(curl -Ls "$url/$1/" | grep "URL" | awk '{print $5}')
+	curl -Lso "$1"."${image##*.}" "$image"
 	echo "xkcd #$1 from $image downloaded"
 }
 
 latest()
 {
-	prev=$(curl -s "$url" | grep "prev" | head -n 1 | awk '{print $3}' | grep -Eo '[0-9]+')
+	prev=$(curl -Ls "$url" | grep "prev" | head -n 1 | awk '{print $3}' | grep -Eo '[0-9]+')
 	echo $((prev+1))
 }
 
