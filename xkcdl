@@ -1,5 +1,5 @@
 #!/bin/sh
-url='https://xkcd.com/'
+url='https://xkcd.com'
 
 usage()
 {
@@ -15,21 +15,14 @@ EOF
 
 download()
 {
-	wget --quiet -O "$1".html "$url""$1"
-	image=$(grep "Image URL (for hotlinking/embedding):" "$1".html | sed 's/Image URL (for hotlinking\/embedding)\: //g')
-
-	wget --quiet -O "$1"."${image##*.}" "$image"
-	echo xkcd \#"$1" from "$image" downloaded
-
-	rm "$1".html
+	image=$(curl -s "$url/$1/" | grep "URL" | awk '{print $5}')
+	curl -so "$1"."${image##*.}" "$image"
+	echo "xkcd #$1 from $image downloaded"
 }
 
 latest()
 {
-	wget --quiet -O latest.html "$url"
-	prev=$(grep "prev" latest.html | head -n 1 | awk '{print $3}' | sed 's/href="\///g' | sed 's/\/"//g')
-	rm latest.html	
-
+	prev=$(curl -s "$url" | grep "prev" | head -n 1 | awk '{print $3}' | grep -Eo '[0-9]+')
 	echo $((prev+1))
 }
 
