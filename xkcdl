@@ -1,66 +1,47 @@
 #!/bin/sh
-l_flag=''
-d_flag=''
-file=''
-a_flag=''
+url='https://xkcd.com/'
 
-url_xkcd='https://xkcd.com/'
-
-print_usage() {
-	echo "usage: xkcdl [-h] [-l] [-d XKCD_NUM] [-a]\n"
-	echo "arguments:"
-	echo "-h            show this help message and exit"
-	echo "-d XKCD_NUM   download specified comic by number"
-	echo "-l            download latest comic"
-	echo "-a            download all comics"
+usage()
+{
+cat << EOF
+usage: xkcdl [-h] [-l] [-d NUM] [-a]
+arguments:
+	-h			show this help message and exit
+	-n NUM		download specified comic by number
+	-l			download latest comic
+	-a			download all comics
+EOF
 }
 
-download() {
-	wget --quiet -O "$1".html "$url_xkcd""$1"
-	url_image=$(grep "Image URL (for hotlinking/embedding):" "$1".html | sed 's/Image URL (for hotlinking\/embedding)\: //g')
+download()
+{
+	wget --quiet -O "$1".html "$url""$1"
+	image=$(grep "Image URL (for hotlinking/embedding):" "$1".html | sed 's/Image URL (for hotlinking\/embedding)\: //g')
 
-	wget --quiet -O "$1"."${url_image##*.}" "$url_image"
-	echo xkcd \#"$1" from "$url_image" downloaded
+	wget --quiet -O "$1"."${image##*.}" "$image"
+	echo xkcd \#"$1" from "$image" downloaded
 
 	rm "$1".html
 }
 
-while getopts 'hld:a' flag; do
-	case "${flag}" in
-		h) print_usage; exit 1 ;;
-		l) l_flag='true' ;;
-		d) d_flag='true'; file="${OPTARG}" ;;
-		a) a_flag='true' ;;
+latest()
+{
+	wget --quiet -O latest.html "$url"
+	prev=$(grep "prev" latest.html | head -n 1 | awk '{print $3}' | sed 's/href="\///g' | sed 's/\/"//g')
+	rm latest.html	
+
+	echo $((prev+1))
+}
+
+while getopts 'hn:la' flag
+do
+	case "$flag"
+	in
+		h) usage ; exit ;;
+		n) download ${OPTARG} ; exit ;;
+		l) download $(latest) ; exit ;;
+		a) for i in $(seq $(latest)); do download $i; done ; exit ;;
 	esac
 done
 
-if [ -z "$l_flag" ] && [ -z "$a_flag" ] && [ -z "$d_flag" ]
-then
-	print_usage; exit 1
-fi
-
-if [ -n "$d_flag" ]
-then
-	download "$file"
-fi
-
-if [ -n "$l_flag" ] || [ -n "$a_flag" ]
-then
-	wget --quiet -O latest.html "$url_xkcd"
-	latest=$(grep "prev" latest.html | head -n 1 | awk '{print $3}' | sed 's/href="\///g' | sed 's/\/"//g')
-	latest=$(($latest+1))
-	rm latest.html
-fi
-
-if [ -n "$l_flag" ]
-then
-	download "$latest"
-fi
-
-if [ -n "$a_flag" ]
-then
-	for i in $(seq 1 "$latest")
-	do
-		download "$i"
-	done
-fi
+usage
