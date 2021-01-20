@@ -5,7 +5,7 @@ timeout=1
 usage()
 {
 cat << EOF
-usage: xkcdl [-h] [-l] [-d NUM] [-a]
+usage: xkcdl [-h] [-l] [-d NUM] [-a] [-t TIME]
 arguments:
     -h          show this help message and exit
     -n NUM      download specified comic by number
@@ -40,7 +40,7 @@ do
         l) download "$(latest)"; exit;;
         a) for i in $(seq "$(latest)"); do download "$i" && sleep "$timeout"; done; exit;;
 
-        *) exit;;
+        *) usage;;
     esac
 done
 
