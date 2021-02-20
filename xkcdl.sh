@@ -17,7 +17,7 @@ usage()
 
 download()
 {
-    image=$(curl -Ls "$url/$1/info.0.json" | jq .img)
+    image=$(curl -Ls "$url/$1/info.0.json" | jq .img | sed 's/"//g')
     curl -Lso "$1.${image##*.}" "$image"
     echo "xkcd #$1 from $image downloaded"
 }
