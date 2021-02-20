@@ -7,11 +7,11 @@ usage()
 	cat <<- EOF
 	usage: xkcdl [-t TIME] [-h] [-l] [-d NUM] [-a] 
 	arguments:
+	    -t TIME   set timeout (low values may get you banned) [must be 1st argument]
 	    -h        show this help message and exit
 	    -n NUM    download specified comic by number
 	    -l        download latest comic
 	    -a        download all comics
-	    -t TIME   set timeout (low timeouts may get you banned)
 	EOF
 }
 
