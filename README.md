@@ -1,2 +1,2 @@
 # xkcdl
-cli for downloading any xkcd comic
+cli for downloading xkcd comics
