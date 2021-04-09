@@ -24,7 +24,7 @@ download()
 
 latest()
 {
-    echo $(curl -s "$url/info.0.json" | jq .num)
+    curl -s "$url/info.0.json" | jq .num
 }
 
 while getopts 'ht:n:la' flag
@@ -38,5 +38,7 @@ do
         n) download "${OPTARG}"; exit;;
         l) download "$(latest)"; exit;;
         a) for i in $(seq "$(latest)"); do download "$i" && sleep "$timeout"; done; exit;;
+	
+	*) usage; exit;;
     esac
 done
