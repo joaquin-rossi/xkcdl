@@ -1,33 +1,34 @@
 #!/bin/sh
-url='https://xkcd.com'
+website='https://xkcd.com'
 timeout=1
+list=''
 
 usage()
 {
 	cat <<- EOF
-	usage: xkcdl [-t TIME] [-h] [-l] [-d NUM] [-a] 
+	usage: xkcdl [-h] [-l] [-n NUM] [-a] [-t TIME]
 	arguments:
-	    -t TIME   set timeout (low values may get you banned) [must be 1st argument]
 	    -h        show this help message and exit
-	    -n NUM    download specified comic by number
 	    -l        download latest comic
+	    -n NUM    download comic specified by number
 	    -a        download all comics
+	    -t TIME   set timeout between downloads
 	EOF
 }
 
 download()
 {
-    image=$(curl -Ls "$url/$1/info.0.json" | jq .img | sed 's/"//g')
-    curl -Lso "$1.${image##*.}" "$image"
-    echo "xkcd #$1 from $image downloaded"
+    url=$(curl -Ls "${website}/${1}/info.0.json" | jq '.img' | sed 's/"//g')
+    curl -Lso "${1}.${url##*.}" "${url}"
+    echo "xkcd #${1} from '${url}' downloaded"
 }
 
 latest()
 {
-    curl -s "$url/info.0.json" | jq .num
+    curl -s "${website}/info.0.json" | jq '.num'
 }
 
-while getopts 'ht:n:la' flag
+while getopts 'ht:ln:a' flag
 do
     case "$flag"
     in
@@ -35,10 +36,18 @@ do
 
         t) timeout="${OPTARG}";;
 
-        n) download "${OPTARG}"; exit;;
-        l) download "$(latest)"; exit;;
-        a) for i in $(seq "$(latest)"); do download "$i" && sleep "$timeout"; done; exit;;
+        l) list="${list}:$(latest)";;
+        n) list="${list}:${OPTARG}";;
+        a) for i in $(seq "$(latest)"); do list="${list}:${i}"; done;;
 	
 	*) usage; exit;;
     esac
+done
+
+[ -z "$list" ] && (usage ; exit)
+
+for i in $(echo "$list" | sed 's/:/\n/g')
+do
+    download "$i"
+    sleep "$timeout"
 done
